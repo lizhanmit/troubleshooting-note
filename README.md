@@ -1,5 +1,31 @@
 # Troubleshooting Note
 
+### Eclipse
+
+**Problem 1**
+
+When creating the first maven project in Eclipse on Ubuntu, cannot download dependencies. 
+
+**Reason**: Have not downloaded maven and configured it in Eclipse.  
+
+**Solution**: Download from http://mirror.ventraip.net.au/apache/maven/maven-3/. Eclipse -> preferences -> maven -> installations -> add; Eclipse -> preferences -> maven -> user settings -> user settings  
+
+Reference: https://jingyan.baidu.com/article/6dad5075209b37a122e36e66.html 
+
+**Problem 2**
+
+On Ubuntu, install hadoop plugin in eclipse：download hadoop-eclipse-plugin-2.7.1.jar, then put it in dropins folder under eclipse directory.  
+
+**Problem 3**
+
+In Eclipse, after running project, got an error message "Could not find or load main class". 
+
+**Reason**: The project name is the same as package name.
+
+**Solution**: Change one.
+
+---
+
 ### Java
 
 **Problem 1**
@@ -32,6 +58,75 @@ Intellij IDEA prompts "Try-with-resources are not supported at language level '5
 Java web app project, Eclipse, error in the jsp file, The superclass “javax.servlet.http.HttpServlet” was not found on the Java Build Path.  
 
 **Soultion**: Project properties → Java Build Path → Add Library → Select "Server Runtime" from the list → Next → Select "Apache Tomcat" → Finish. https://stackoverflow.com/questions/22756153/the-superclass-javax-servlet-http-httpservlet-was-not-found-on-the-java-build  
+
+---
+
+### Hive
+
+**Problem 1**
+
+When executing HiveQL, error message: ParseException missing KW_END at ')' near '<EOF>'.
+
+**Reason**: SQL "case when then else end" statement misses "end".
+
+---
+
+### Maven
+
+**Problem 1**
+
+When cloning the project from GitHub to Intellij IDEA, mvn install failed due to java outOfMemory exception.
+
+**Reason**: mvn packaging runs out of memory. 
+
+**Solution**: 
+
+- Modify "intellij-2019.1.3-win\bin\idea.exe.vmoptions" as follows:
+
+    ```
+	-server
+	-Xms1024m
+	-Xmx2048m
+	-XX:MaxPermSize=1024m
+	-XX:ReservedCodeCacheSize=225m
+	-XX:+UseConcMarkSweepGC
+	-XX:SoftRefLRUPolicyMSPerMB=50
+	-ea
+	-Dsun.io.useCanonCaches=false
+	-Djava.net.preferIPv4Stack=true
+	-Djdk.http.auth.tunneling.disabledSchemes=""
+	-XX:+HeapDumpOnOutOfMemoryError
+	-XX:-OmitStackTraceInFastThrow
+	```
+
+- Set a Windows env variable
+	- name: MAVEN_OPS
+	- value: -Xmx1024m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m
+- Set "testFailureIgnore" to true from false inside pom.xml file of the project as follows.
+
+	````
+	<!-- enable scalatest -->
+	<plugin>
+		<groupId>org.scalatest</groupId>
+		<artifactId>scalatest-maven-plugin</artifactId>
+		<version>${scalaTstMvnPlgin}</version>
+		<configuration>
+			<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+			<junitxml>.</junitxml>
+			<filereports>ScalaTestReport.txt</filereports>
+			<!--htmlreporters>${project.build.directory}/html/scalatest</htmlreporters-->
+			<testFailureIgnore>true</testFailureIgnore>
+		</configuration>
+		<executions>
+			<execution>
+				<id>test</id>
+				<goals>
+					<goal>test</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+	````
 
 ---
 
@@ -80,22 +175,22 @@ ERROR CodeGenerator: failed to compile: org.codehaus.janino.InternalCompilerExce
 
 ---
 
-### Eclipse
+### Talend 
 
 **Problem 1**
 
-When creating the first maven project in Eclipse on Ubuntu, cannot download dependencies. 
+When I am following along with the Talend Tutorial video on condition based filtering, I receive the following error when I run my job: 
 
-**Reason**: Have not downloaded maven and configured it in Eclipse.  
+```
+Exception in component tMap_1 (conditionBasedFiltering) 
+java.lang.NullPointerException 
+  at talenddemo.conditionbasedfiltering_0_1.conditionBasedFiltering.tFileInputDelimited_1Process(conditionBasedFiltering.java:1627) 
+  at talenddemo.conditionbasedfiltering_0_1.conditionBasedFiltering.runJobInTOS(conditionBasedFiltering.java:2352) 
+  at talenddemo.conditionbasedfiltering_0_1.conditionBasedFiltering.main(conditionBasedFiltering.java:2201)  
+```
 
-**Solution**: Download from http://mirror.ventraip.net.au/apache/maven/maven-3/. Eclipse -> preferences -> maven -> installations -> add; Eclipse -> preferences -> maven -> user settings -> user settings  
-
-Reference: https://jingyan.baidu.com/article/6dad5075209b37a122e36e66.html 
-
-**Problem 2**
-
-On Ubuntu, install hadoop plugin in eclipse：download hadoop-eclipse-plugin-2.7.1.jar, then put it in dropins folder under eclipse directory.  
-
+**Solution**: tMap expression filter 加一个判断 && row_name != null. 
+ 
 ---
 
 ### Ubuntu
@@ -113,23 +208,4 @@ In Ubuntu, cannot paste files into a folder.
 In Ubuntu, cannot open terminal after installing python3.6 and change default python3 to python3.6.  
 
 **Solution**: https://blog.csdn.net/Threeyearsago/article/details/80276579 
- 
----
-
-### Talend 
-
-**Problem 1**
-
-When I am following along with the Talend Tutorial video on condition based filtering, I receive the following error when I run my job: 
-
-```
-Exception in component tMap_1 (conditionBasedFiltering) 
-java.lang.NullPointerException 
-  at talenddemo.conditionbasedfiltering_0_1.conditionBasedFiltering.tFileInputDelimited_1Process(conditionBasedFiltering.java:1627) 
-  at talenddemo.conditionbasedfiltering_0_1.conditionBasedFiltering.runJobInTOS(conditionBasedFiltering.java:2352) 
-  at talenddemo.conditionbasedfiltering_0_1.conditionBasedFiltering.main(conditionBasedFiltering.java:2201)  
-```
-
-**Solution**: tMap expression filter 加一个判断 && row_name != null. 
-
  
